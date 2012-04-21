@@ -1,0 +1,333 @@
+%  http://vlado.keselj.net/dalcsthesis/
+% is the more recent one
+
+\documentclass[12pt]{article}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{letterpaper} % or letter or a5paper or ... etc
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{verbatim}
+\usepackage{url}
+\urlstyle{rm} 
+\setlength\parindent{0in}
+\usepackage[usenames,dvipsnames]{color}
+%\definecolor{DarkGrey}{rgb}{0.4,0.4,0.4}
+\usepackage[pdftex,colorlinks=true,urlcolor=MidnightBlue,linkcolor=MidnightBlue]{hyperref}
+\usepackage{titlesec}
+
+%\titleformat{\section}
+%\titlespacing{\section}{0pt}{5pt}{5pt}
+
+%\titleformat{\subsection}
+%{\normalfont\bfseries\singlespacing}{\thesubsection}{1em}{}
+%\titleformat{\subsection}
+  %{\bf\normalsize}{\thesubsection}{1em}{}
+%\titlespacing{\subsection}{0mm}{*1}{1.5mm}
+
+\titleformat{\section}
+  {\bf\Large}{\thesection}{11pt}{}
+\titlespacing{\section}{0pt}{12pt}{4pt}
+
+%\clubpenalty10000
+%\widowpenalty10000
+\widowpenalty=10000
+\clubpenalty=10000
+
+
+
+\title{What I Learned About Formatting a Dalhousie\\ Thesis to FGS Specifications Using \LaTeX}
+\author{Sean Anderson\\sean.charles.anderson ``at'' gmail.com}
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+\setlength{\parskip}{1.9mm}
+
+\bigskip
+\bigskip
+
+Typesetting my thesis in \LaTeX~was generally a pleasant experience and I can't imagine doing it any other way. However, I did discover a number of things that would have been helpful to know beforehand. I'll write these now while they are still fresh in my mind and hopefully they will make the process that much faster and painless for you. You can reference the format of my thesis at:\\
+\url{http://seananderson.ca/cv/Anderson_MSc_2010.pdf}.
+
+\section{Title Case Your Sections}
+FGS Likes It That Way.
+
+\section{The new electronic submission procedure}
+FGS is in the process of evolving beyond the age of typewriters. They are phasing out paper bound copies. At the time of writing, they want three paper copies to be bound and an electronic copy to be uploaded for the libraries at: \url{http://dalspace.library.dal.ca/}
+Soon they will do electronic only, so do ask first.
+
+You need to register on DalSpace first and then contact thesis@dal.ca to ask them to contact the library to grant you access to the thesis section.
+
+The electronic versions must be in PDF/A format (a PDF specification for archival purposes). This was a bit of a headache. I ended up using Adobe Acrobat. There are other options. Make sure to turn any translucent colours into their opaque equivalents first. Acrobat calls this ``flattening''. I call Adobe's terminology and menu system ``opaque''.
+
+\section{Raggedbottom}
+By the time you double space the text and use the required gigantic margins, your paragraphs will get pulled apart from each other and your section titles in uneven amounts. This is to keep the bottom margin consistent. FGS doesn't like this. Instead, add 
+\begin{verbatim}
+\raggedbottom
+\end{verbatim}
+to let the bottom margin vary as necessary.
+
+\section{The class file}
+The \LaTeX\ files linked on the FGS website are old. Updated ones are here along with detailed instructions and examples:
+\url{http://vlado.keselj.net/dalcsthesis/}
+
+These still didn't pass the format check. I had to make the following changes to the class file (\verb#dalthesis.cls#):
+
+\begin{verbatim}
+- \def\@dept{Faculty of Computer Science}
++ \def\@dept{Department of Biology}
+
+I'm only the showing the first parts of these lines to avoid line-wrap:
+- \def\msc{\degree{Master of Science}\degreeinitial{M.Sc.}
++ \def\msc{\degree{Master of Science}\degreeinitial{MSc}
+
+I'm only the showing the first parts of these lines to avoid line-wrap:
+- \def\phd{\degree{Doctor of Philosophy}\degreeinitial{Ph.D.}
++ \def\phd{\degree{Doctor of Philosophy}\degreeinitial{PhD}
+
+- Submitted in partial fulfillment of the \\
+- requirements for the degree of \\
++ Submitted in partial fulfillment of the requirements\\
++ for the degree of \\
+\end{verbatim}
+
+
+\section{Captions}
+Only the first sentence of each figure and table caption should be in the table of contents. I waited until near the end and then ran through my file with a text editor macro to fix this (adding the [ ] bracketed version of each first sentence). That worked well.
+
+\section{Quasi-Sweave}
+Sweave is awesome and worth using even just to add any numbers that are derived from your analysis. It's probably overkill to run your entire analysis with it (although more power to you if you want to). You might find it useful to add sample sizes, maybe goodness of fit statistics, or even heaven forbid, a p-value. Any numbers that might change if part of your analysis gets changed. It's just a \LaTeX\ file with a .Rnw extension, the Sweave package called at the beginning, and then a bit of code when you want to use it. An example of including some values:
+
+\begin{verbatim}
+\usepackage{Sweave} 
+<<echo = false, results = hide>>=
+load("my.output.data.for.sweave.RData") 
+# contains: object1, object2, and object3
+@
+\end{verbatim}
+
+Then, in text, refer to the objects as:
+\begin{verbatim}
+\Sexpr{object1} 
+\end{verbatim}
+
+Make sure you edit the .Rnw file and not the .tex file that it produces.
+If somewhere in your R script this data gets written each time your analysis is run then your thesis will keep itself up to date. Now when you compile your document you'll need to have Sweave called first to turn your .Rnw file into a .tex file. See the next section for ideas on making this easy.
+
+\section{A Makefile}
+Between Sweave, Bib\TeX, the glossary, and the ridiculous number of times you'll have to run \verb#pdflatex# or \verb#latex#, it would probably be useful to create a makefile or even just a bash script to compile your thesis. Even without Sweave this can be useful. I had two bash script versions that compiled my thesis: (1) the make-sure-everything-is-compiled-complete-version and (2) the quick-no-Bib\TeX-changes-compile-version.
+
+My complete version looked something like this:
+\begin{verbatim}
+#!/usr/bin/env bash
+# compiles anderson-msc-2010.tex
+# chmod +x makethesis
+# then run it as:
+# ./makethesis
+
+THESISFILE="anderson-msc-2010"
+CH2SWEAVEFILE="ch2.Rnw"
+
+rm *.blg
+rm *.bbl
+rm *.ist
+rm *.glo
+rm *.toc
+rm *.lot
+rm *.log
+rm *.lof
+rm *.aux
+
+R CMD Sweave $CH2SWEAVEFILE
+pdflatex $THESISFILE
+makeglos.pl $THESISFILE
+bibtex $THESISFILE
+pdflatex $THESISFILE
+pdflatex $THESISFILE
+pdflatex $THESISFILE
+pdflatex $THESISFILE
+\end{verbatim}
+
+Remove most except for a call to \verb#Sweave# and \verb#pdflatex# for the minimal version. The complete script isn't pretty, and it's overkill in sections, but it's automated, it does the job, and it satisfies those obsessive tendencies that \LaTeX\ can induce.
+Remember that \verb#pdflatex# (or \verb#latex#) needs to be run extra times for abbreviations etc.
+
+\section{Abbreviations/symbols/glossary}
+You could add these throughout your text as you write. I waited until near the end and pulled them out through a combination of regular expressions, memory, and reading my thesis. I put them into a spreadsheet and created a column that generated the appropriate \LaTeX\ code for the glossary. Grab my spreadsheet here:\\
+\url{http://seananderson.ca/dalthesis/abbreviations.xls}
+
+You will need the glossary package from \url{http://www.ctan.org/tex-archive/macros/latex/contrib/glossary/} and you will need to generate \verb#makeglos.pl# via\\ \verb#latex glossary.ins# and then follow the instructions of where to put the files. If the Perl file \verb#makeglos.pl# isn't in your path then you will have to fully reference it in your bash makefile (above).
+
+\section{Version control}
+It rocks. It's like writing over a safety net. Well worth the small initial investment of learning time especially for the dividends it pays off with coding in other languages as well.
+
+Git, Mercurial, or Bazaar are all great. SVN too if you're already familiar with it. Otherwise go with one of the newer distributed version control systems listed before.
+
+\section{The readers page}
+The lines with readers and supervisors should be blank:
+\begin{verbatim}
+\supervisor{}
+\reader{}
+\reader{}
+\reader{}
+\reader{}
+\end{verbatim}
+
+\section{Margins, margins, margins}
+Margins become a big deal. They're going to take a ruler to them. Good idea to print off a page and do the same yourself. Make sure your print settings aren't resizing the page.
+
+The default setup gives you left hand margins of 1.25 inches, which is smaller than the states 1.5 inches, but they don't mind. 
+
+I had to play with the text height to get bottom margins correct:
+\begin{verbatim}
+\setlength{\textheight}{605pt}
+\end{verbatim}
+
+Get a format check done early by FGS. Just email them a link to an in progress PDF.
+
+\section{What if your defence date hasn't been set yet?}
+A blank date is OK to hand in initially if the defence date isn't known. Have another copy of your signature page printed (single sided) once you know the defence date in case your committee decides to sign at your defence.
+
+\section{Clubbing widows and orphans}
+The default \LaTeX\ settings for widows and orphans very generously allow these to persist. The following is more sane:
+\begin{verbatim}
+\widowpenalty=1000
+\clubpenalty=1000
+\end{verbatim}
+This will help reduce widows and orphans without making typographically poor decisions. Using \verb#10000# will do so at any cost and may be preferable.
+ 
+\section{Beautify those tables}
+The \verb#booktabs# package is awesome. Using:
+\newpage
+\begin{verbatim}
+\toprule
+\midrule
+\bottomrule
+\end{verbatim}
+
+in place of 
+\begin{verbatim}
+\hline
+\hline
+\hline
+\end{verbatim}
+
+changes this:
+
+\bigskip
+\begin{tabular}{lll}
+\hline
+Header1 & Header2 & Header3\\
+\hline
+1 & 2 & 3\\
+1 & 2 & 3\\
+\hline
+\end{tabular}
+\bigskip
+
+into this:
+
+\bigskip
+\begin{tabular}{lll}
+\toprule
+Header1 & Header2 & Header3\\
+\midrule
+1 & 2 & 3\\
+1 & 2 & 3\\
+\bottomrule
+\end{tabular}
+\bigskip
+  
+\section{Spaces in folder paths}
+If you were careless years ago (like me) and used spaces in an analysis folder and you are now trying to include figures from that folder, the \verb#grffile# package will fix it.
+\begin{verbatim}
+\usepackage{grffile}
+\end{verbatim}
+ 
+\section{Floating}
+The following provides a saner set of preferences for floating figures and tables:
+\begin{verbatim}
+\renewcommand{\topfraction}{.85}
+\renewcommand{\bottomfraction}{.7}
+\renewcommand{\textfraction}{.15}
+\renewcommand{\floatpagefraction}{.66}
+\renewcommand{\dbltopfraction}{.66}
+\renewcommand{\dblfloatpagefraction}{.66}
+\setcounter{topnumber}{9}
+\setcounter{bottomnumber}{9}
+\setcounter{totalnumber}{20}
+\setcounter{dbltopnumber}{9}
+\end{verbatim}
+
+\section{Formatting the section and subsection headers}
+The following redefines section and subsection headers to get the spacing the way FGS wants it. You'll need the package:
+\begin{verbatim}
+\usepackage[compact]{titlesec}
+\end{verbatim}
+
+\begin{verbatim}
+\titleformat{\section}
+  {\normalfont\large\bfseries\singlespacing}{\thesection}{1em}{}
+\titlespacing{\section}{0pt}{5pt}{5pt}
+
+\titleformat{\subsection}
+{\normalfont\bfseries\singlespacing}{\thesubsection}{1em}{}
+\end{verbatim}
+
+\section{Spaces after periods}
+Don't forget that \LaTeX~assumes a period means the end of a sentence and adds extra space. So you need to tell \LaTeX~to put a small space after lower case letters with periods in the middle of a sentence. 
+\begin{verbatim}
+e.g.\ an example or e.g.~an example (to also avoid a line break)
+\end{verbatim}
+But \LaTeX\ is smart and assumes capital letters are initials or acronyms. So:
+\begin{verbatim}
+S. C. Anderson
+\end{verbatim}
+is fine.
+
+\section{Indenting where you don't want it}
+The first paragraph after a title shouldn't be indented. Randomly, some of mine where. The occasional:
+\begin{verbatim}
+/noindent 
+\end{verbatim}
+fixed it.
+
+\section{Getting the order of citations correct}
+Bib\TeX\ will order citations by the same author in the same year according to the title alphabetically, but you probably want them to appear in the order you cite them. E.g.\ Smith 2010a should come before Smith 2010b.
+
+Near the end of your writing, extract the citations from your main .bib file. You'll need to do make some modifications as I describe below. Plus, 10 years down the road you'll still be able to recompile your thesis. There are a number of scripts that do this. Bibtool is one: \url{http://www.ctan.org/tex-archive/biblio/bibtex/utils/bibtool/}
+
+You can use it like this:
+\begin{verbatim}
+bibtool -i /path/to/main.bib -x my-thesis.aux > extracted.bib
+\end{verbatim}
+
+Then I used this bash script with some regular expressions to pull out suspect citations (make sure you have \verb#pdftotext# installed first):
+\begin{verbatim}
+#!/usr/bin/env bash
+
+# finds citations of the form Smith 1999b
+# in case they happen before Smith 1999a
+
+# use pdftotext to turn your PDF into a text file first
+# http://en.wikipedia.org/wiki/Pdftotext
+pdftotext anderson-msc-2010.pdf
+
+# on one line:
+perl -nle 'while(m/([a-zA-Z\. ]*)\s+([0-9][0-9][0-9][0-9][abcd])/g)
+   {print "$1 $2"}' anderson-msc-2010.txt > citations_with_letters.txt
+\end{verbatim}
+
+Then look through them and made sure all the a's and b's are in the right order. If some aren't, you'll have to fix them with invisible boxes in your extracted .bib file:
+\begin{verbatim}
+Title = {\setbox0=\hbox{1}{Global} database on...  },
+and
+Title = {\setbox0=\hbox{2}{Description} of {SAUP} Global Fisheries... },
+\end{verbatim}
+
+Note the need to protect the capitalization of your first letter now.
+
+\section{Discussion}
+``Discussion'' needs to be the title of your last chapter. Nothing more and nothing less.
+
+\end{document}
