@@ -1,9 +1,6 @@
-%  http://vlado.keselj.net/dalcsthesis/
-% is the more recent one
-
 \documentclass[12pt]{article}
-\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
-\geometry{letterpaper} % or letter or a5paper or ... etc
+\usepackage{geometry} 
+\geometry{letterpaper} 
 \usepackage{titlesec}
 \usepackage{booktabs}
 \usepackage{verbatim}
@@ -11,33 +8,19 @@
 \urlstyle{rm} 
 \setlength\parindent{0in}
 \usepackage[usenames,dvipsnames]{color}
-%\definecolor{DarkGrey}{rgb}{0.4,0.4,0.4}
 \usepackage[pdftex,colorlinks=true,urlcolor=MidnightBlue,linkcolor=MidnightBlue]{hyperref}
 \usepackage{titlesec}
-
-%\titleformat{\section}
-%\titlespacing{\section}{0pt}{5pt}{5pt}
-
-%\titleformat{\subsection}
-%{\normalfont\bfseries\singlespacing}{\thesubsection}{1em}{}
-%\titleformat{\subsection}
-  %{\bf\normalsize}{\thesubsection}{1em}{}
-%\titlespacing{\subsection}{0mm}{*1}{1.5mm}
 
 \titleformat{\section}
   {\bf\Large}{\thesection}{11pt}{}
 \titlespacing{\section}{0pt}{12pt}{4pt}
 
-%\clubpenalty10000
-%\widowpenalty10000
 \widowpenalty=10000
 \clubpenalty=10000
 
-
-
 \title{What I Learned About Formatting a Dalhousie\\ Thesis to FGS Specifications Using \LaTeX}
-\author{Sean Anderson\\sean.charles.anderson ``at'' gmail.com}
-
+\author{Sean Anderson\\sean ``at'' seananderson.ca}
+\date{May 13, 2010}
 
 \begin{document}
 \maketitle
@@ -91,7 +74,6 @@ I'm only the showing the first parts of these lines to avoid line-wrap:
 + Submitted in partial fulfillment of the requirements\\
 + for the degree of \\
 \end{verbatim}
-
 
 \section{Captions}
 Only the first sentence of each figure and table caption should be in the table of contents. I waited until near the end and then ran through my file with a text editor macro to fix this (adding the [ ] bracketed version of each first sentence). That worked well.
@@ -331,3 +313,4 @@ Note the need to protect the capitalization of your first letter now.
 ``Discussion'' needs to be the title of your last chapter. Nothing more and nothing less.
 
 \end{document}
+
